@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	visibleTrees := VisibleTrees("08/input.txt")
+	visibleTrees := VisibleTrees("08/input_test.txt")
 	fmt.Println("Visible trees: ", visibleTrees)
 }
 
@@ -29,30 +29,45 @@ func visibleTreesInside(inputData [][]int) int {
 	iMax := len(inputData) - 1
 	jMax := len(inputData) - 1
 
+	var scenicScores []int
+
 	for i := 1; i < iMax; i++ {
 		for j := 1; j < jMax; j++ {
-			if isVisible(inputData, i, j, iMax, jMax) == true {
+			visible, scenicScore := isVisible(inputData, i, j, iMax, jMax)
+			if visible == true {
 				count++
 			}
+			scenicScores = append(scenicScores, scenicScore)
 		}
 	}
+
+	// max
+	fmt.Println("Scenic scores: ", scenicScores)
 
 	return count
 }
 
-func isVisible(inputData [][]int, x int, y int, iMax int, jMax int) bool {
+func isVisible(inputData [][]int, x int, y int, iMax int, jMax int) (bool, int) {
 	currentTree := inputData[x][y]
+	scenicScore := 0
 
 	allHigherLeft := false
 	allHigherRight := false
 	allHigherUp := false
 	allHigherDown := false
 
+	scenicScoreLeft := 0
+	scenicScorerRight := 0
+	scenicScoreUp := 0
+	scenicScoreDown := 0
+
 	// left
 	for j := y - 1; j >= 0; j-- {
 		if inputData[x][j] >= currentTree {
 			allHigherLeft = true
 			break
+		} else {
+			scenicScoreLeft++
 		}
 	}
 
@@ -61,6 +76,8 @@ func isVisible(inputData [][]int, x int, y int, iMax int, jMax int) bool {
 		if inputData[x][j] >= currentTree {
 			allHigherRight = true
 			break
+		} else {
+			scenicScorerRight++
 		}
 	}
 
@@ -69,6 +86,8 @@ func isVisible(inputData [][]int, x int, y int, iMax int, jMax int) bool {
 		if inputData[i][y] >= currentTree {
 			allHigherUp = true
 			break
+		} else {
+			scenicScoreUp++
 		}
 	}
 
@@ -77,16 +96,20 @@ func isVisible(inputData [][]int, x int, y int, iMax int, jMax int) bool {
 		if inputData[i][y] >= currentTree {
 			allHigherDown = true
 			break
+		} else {
+			scenicScoreDown++
 		}
 	}
+
+	scenicScore = scenicScoreLeft * scenicScorerRight * scenicScoreUp * scenicScoreDown
 
 	if allHigherLeft == false ||
 		allHigherRight == false ||
 		allHigherUp == false ||
 		allHigherDown == false {
-		return true
+		return true, scenicScore
 	} else {
-		return false
+		return false, scenicScore
 	}
 }
 
