@@ -23,12 +23,13 @@ type Directory struct {
 }
 
 func main() {
-	totalSize := TotalSize("07/input_test.txt")
-	fmt.Println("Packet starts at index: ", totalSize)
+	totalSize := TotalSize("07/input.txt")
+	fmt.Println("Total size: ", totalSize)
 }
 
 func TotalSize(fileName string) int {
 	totalSize := 0
+
 	var rootDirectory Directory
 	var currentDirectory *Directory
 
@@ -82,6 +83,55 @@ func TotalSize(fileName string) int {
 		}
 	}
 
-	fmt.Println(rootDirectory)
+	calculateSizes(&rootDirectory)
+
+	allSizes := storeAllSizes(&rootDirectory)
+
+	minDelete := 30000000
+	totalUnused := 70000000 - rootDirectory.size
+
+	for _, v := range allSizes {
+		if v < 100000 {
+			totalSize += v
+		}
+
+		if v >= 30000000-totalUnused && v < totalUnused {
+			if minDelete > v {
+				minDelete = v
+			}
+		}
+	}
+
+	fmt.Println("Min size to delete: ", minDelete)
 	return totalSize
+}
+
+func storeAllSizes(directory *Directory) []int {
+	var allSizes []int
+
+	allSizes = append(allSizes, directory.size)
+
+	for _, dir := range directory.children {
+		allSizes = append(allSizes, storeAllSizes(dir)...)
+	}
+
+	return allSizes
+}
+
+func calculateSizes(directory *Directory) int {
+	filesSize := 0
+
+	if len(directory.children) > 0 {
+		for _, dir := range directory.children {
+			filesSize += calculateSizes(dir)
+		}
+	}
+
+	for _, v := range directory.files {
+		filesSize += v.size
+	}
+
+	directory.size = filesSize
+
+	return filesSize
 }
