@@ -18,3 +18,20 @@ func TestVisitedCount(t *testing.T) {
 		}
 	}
 }
+
+var visitedCountLongTest = []struct {
+	input    string
+	expected int // expected result
+}{
+	{"input_test_01.txt", 36},
+}
+
+func TestVisitedCountLong(t *testing.T) {
+	for _, val := range visitedCountLongTest {
+		got := VisitedCount(val.input)
+
+		if got != val.expected {
+			t.Error("Nah, it was: ", got)
+		}
+	}
+}
