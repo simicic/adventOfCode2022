@@ -18,8 +18,70 @@ var head Knot
 var tail Knot
 
 func main() {
-	visitedCount := VisitedCount("09/input.txt")
+	visitedCount := VisitedCount("09/input_test_01.txt")
 	fmt.Println("Visible knots: ", visitedCount)
+
+	visitedCountLong := VisitedCountLong("09/input_test_01.txt")
+	fmt.Println("Visible knots: ", visitedCountLong)
+}
+
+func VisitedCount(fileName string) int {
+	visitedCount := 0
+
+	tailVisited := make(map[string]int)
+	tailVisited["[0,0]"] = 1
+
+	inputData := readInputData(fileName)
+
+	head := make([]Knot, 10)
+	tail := &head[len(head)-1]
+
+	for _, v := range inputData {
+		direction, step := decipherCommand(v)
+
+		moveLong(&head, tail, &tailVisited, direction, step)
+	}
+
+	return visitedCount
+}
+
+func moveLong(head *[]Knot, tail *Knot, tailVisited *map[string]int, direction string, step int) {
+	switch direction {
+	case "R":
+		endHead := (*head)[len(*head)-1]
+
+		for i := 1; i <= step; i++ {
+			prevHead := (*head)[0]
+
+			for j := 0; j < 9; j++ {
+				prevHead = (*head)[j]
+				(*head)[j].x = (*head)[j].x + 1
+			}
+
+			actionTail(&endHead, tail, prevHead, tailVisited)
+		}
+	case "L":
+		for i := 1; i <= step; i++ {
+			prevHead := *head
+			head.x = head.x - 1
+
+			actionTail(head, tail, prevHead, tailVisited)
+		}
+	case "U":
+		for i := 1; i <= step; i++ {
+			prevHead := *head
+			head.y = head.y + 1
+
+			actionTail(head, tail, prevHead, tailVisited)
+		}
+	case "D":
+		for i := 1; i <= step; i++ {
+			prevHead := *head
+			head.y = head.y - 1
+
+			actionTail(head, tail, prevHead, tailVisited)
+		}
+	}
 }
 
 func VisitedCount(fileName string) int {
