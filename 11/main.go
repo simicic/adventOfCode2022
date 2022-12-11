@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -34,50 +35,20 @@ func MonkeyBusinessLevel(fileName string) int {
 		for monkeyIndex := 0; monkeyIndex < len(monkeyBusiness); monkeyIndex++ {
 			monkey := monkeyBusiness[monkeyIndex]
 
-			fmt.Println(" ")
-			fmt.Println("Monkey ", monkeyIndex)
-
-			fmt.Println("Processing monkey: ", monkeyIndex, " in iteration count: ", roundCount)
-			if roundCount > 20 {
-				break
-			}
-
-			if len(monkey.items) == 0 {
-				continue
-			}
-
 			for _, item := range monkey.items {
-
-				//Monkey inspects an item with a worry level of 79.
-				//
-				//Monkey gets bored with item. Worry level is divided by 3 to 500.
-				//Current worry level is not divisible by 23.
-				//Item with worry level 500 is thrown to monkey 3.
-
-				fmt.Println("Monkey inspects an item with a worry level of ", item)
-
-				// Worry level is multiplied by 19 to 1501.
 				newValue := processOperation(monkey.operation, item)
-				// Monkey gets bored with item. Worry level is divided by 3 to 500.
-
 				newValue = newValue / 3
-				fmt.Println("Monkey gets bored with item. Worry level is divided by 3 : ", newValue)
-				// Current worry level is not divisible by 23.
 
 				var otherMonkey Monkey
 				var otherMonkeyIndex int
 
 				if newValue%monkey.testDivisionBy == 0 {
-					fmt.Println("Current worry level is not divisible by ", monkey.testDivisionBy)
 					otherMonkeyIndex = monkey.divisionTrue
 					otherMonkey = monkeyBusiness[otherMonkeyIndex]
 				} else {
-					fmt.Println("Current worry level is divisible by ", monkey.testDivisionBy)
 					otherMonkeyIndex = monkey.divisionFalse
 					otherMonkey = monkeyBusiness[otherMonkeyIndex]
 				}
-
-				fmt.Println("Item with worry level ", newValue, " is thrown to monkey ", otherMonkeyIndex)
 
 				otherMonkey.items = append(otherMonkey.items, newValue)
 
@@ -87,19 +58,26 @@ func MonkeyBusinessLevel(fileName string) int {
 				(&monkey).inspectedItemsCount = (&monkey).inspectedItemsCount + 1
 			}
 
-			delete(monkeyBusiness, monkeyIndex)
-			monkeyBusiness[monkeyIndex] = monkey
-
 			(&monkey).items = []int{}
 
-			roundCount++
+			delete(monkeyBusiness, monkeyIndex)
+			monkeyBusiness[monkeyIndex] = monkey
+		}
 
-			if roundCount > 20 {
-				break
-			}
-			//printCountsPerMoney(monkeyBusiness)
+		roundCount++
+		if roundCount > 20 {
+			break
 		}
 	}
+
+	var levels []int
+	for _, monkey := range monkeyBusiness {
+		levels = append(levels, monkey.inspectedItemsCount)
+	}
+	sort.Ints(levels)
+
+	monkeyBusinessLevel = levels[len(levels)-1] * levels[len(levels)-2]
+
 	return monkeyBusinessLevel
 }
 
@@ -127,8 +105,6 @@ func processOperation(operation string, item int) int {
 	} else {
 		newValue = item + by
 	}
-
-	fmt.Println("Worry level is multiplied by ", by, " to ", newValue)
 
 	return newValue
 }
