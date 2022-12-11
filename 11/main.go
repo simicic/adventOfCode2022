@@ -30,8 +30,9 @@ func MonkeyBusinessLevel(fileName string) int {
 	roundCount := 1
 
 	monkeyBusiness := readInputData(fileName)
+	roundsLimit := 20
 
-	for roundCount <= 20 {
+	for roundCount <= roundsLimit {
 		for monkeyIndex := 0; monkeyIndex < len(monkeyBusiness); monkeyIndex++ {
 			monkey := monkeyBusiness[monkeyIndex]
 
@@ -65,7 +66,7 @@ func MonkeyBusinessLevel(fileName string) int {
 		}
 
 		roundCount++
-		if roundCount > 20 {
+		if roundCount > roundsLimit {
 			break
 		}
 	}
@@ -81,7 +82,7 @@ func MonkeyBusinessLevel(fileName string) int {
 	return monkeyBusinessLevel
 }
 
-func printCountsPerMoney(monkeyBusiness map[int]Monkey) {
+func printCountsPerMonkey(monkeyBusiness map[int]Monkey) {
 	for i, v := range monkeyBusiness {
 		fmt.Println("Monkey: ", i, " : ", v.items)
 	}
