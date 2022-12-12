@@ -21,7 +21,7 @@ type Monkey struct {
 }
 
 func main() {
-	monkeyBusinessLevel := MonkeyBusinessLevel("11/input_test.txt")
+	monkeyBusinessLevel := MonkeyBusinessLevel("11/input.txt")
 	fmt.Println("Level of monkey business: ", monkeyBusinessLevel)
 }
 
@@ -30,7 +30,9 @@ func MonkeyBusinessLevel(fileName string) int {
 	roundCount := 1
 
 	monkeyBusiness := readInputData(fileName)
-	roundsLimit := 20
+	roundsLimit := 10000
+
+	modulo := modulo(monkeyBusiness)
 
 	for roundCount <= roundsLimit {
 		for monkeyIndex := 0; monkeyIndex < len(monkeyBusiness); monkeyIndex++ {
@@ -38,7 +40,7 @@ func MonkeyBusinessLevel(fileName string) int {
 
 			for _, item := range monkey.items {
 				newValue := processOperation(monkey.operation, item)
-				newValue = newValue / 3
+				newValue = newValue % modulo
 
 				var otherMonkey Monkey
 				var otherMonkeyIndex int
@@ -80,6 +82,14 @@ func MonkeyBusinessLevel(fileName string) int {
 	monkeyBusinessLevel = levels[len(levels)-1] * levels[len(levels)-2]
 
 	return monkeyBusinessLevel
+}
+
+func modulo(monkeyBusiness map[int]Monkey) int {
+	modulo := 1
+	for _, v := range monkeyBusiness {
+		modulo *= v.testDivisionBy
+	}
+	return modulo
 }
 
 func printCountsPerMonkey(monkeyBusiness map[int]Monkey) {
