@@ -18,14 +18,14 @@ var head Knot
 var tail Knot
 
 func main() {
-	visitedCount := VisitedCount("09/input_test_01.txt")
-	fmt.Println("Visible knots: ", visitedCount)
+	//visitedCount := VisitedCount("09/input.txt")
+	//fmt.Println("Visible knots: ", visitedCount)
 
 	visitedCountLong := VisitedCountLong("09/input_test_01.txt")
 	fmt.Println("Visible knots: ", visitedCountLong)
 }
 
-func VisitedCount(fileName string) int {
+func VisitedCountLong(fileName string) int {
 	visitedCount := 0
 
 	tailVisited := make(map[string]int)
@@ -33,54 +33,44 @@ func VisitedCount(fileName string) int {
 
 	inputData := readInputData(fileName)
 
-	head := make([]Knot, 10)
-	tail := &head[len(head)-1]
+	head := make([]*Knot, 10)
+
+	for i := 0; i < 10; i++ {
+		knot := Knot{0, 0}
+		head[i] = &knot
+	}
 
 	for _, v := range inputData {
 		direction, step := decipherCommand(v)
 
-		moveLong(&head, tail, &tailVisited, direction, step)
+		fmt.Println("Moving direction: ", direction, " steps: ", step)
+		moveLong(head, &tailVisited, direction, step)
+		for i, v := range head {
+			fmt.Println("Index: ", i, " value: ", v.x, v.y)
+		}
+		fmt.Println("Tail visited: ", tailVisited)
 	}
+	visitedCount = len(tailVisited)
 
 	return visitedCount
 }
 
-func moveLong(head *[]Knot, tail *Knot, tailVisited *map[string]int, direction string, step int) {
+func actionTailLong(tail *Knot, prevHead Knot, tailVisited *map[string]int) {
+	tail.moveTo(prevHead)
+	coordinates := fmt.Sprintf("[%v,%v]", tail.x, tail.y)
+	(*tailVisited)[coordinates]++
+}
+
+func moveLong(head []*Knot, tailVisited *map[string]int, direction string, step int) {
 	switch direction {
 	case "R":
-		endHead := (*head)[len(*head)-1]
 
-		for i := 1; i <= step; i++ {
-			prevHead := (*head)[0]
-
-			for j := 0; j < 9; j++ {
-				prevHead = (*head)[j]
-				(*head)[j].x = (*head)[j].x + 1
-			}
-
-			actionTail(&endHead, tail, prevHead, tailVisited)
-		}
 	case "L":
-		for i := 1; i <= step; i++ {
-			prevHead := *head
-			head.x = head.x - 1
 
-			actionTail(head, tail, prevHead, tailVisited)
-		}
 	case "U":
-		for i := 1; i <= step; i++ {
-			prevHead := *head
-			head.y = head.y + 1
 
-			actionTail(head, tail, prevHead, tailVisited)
-		}
 	case "D":
-		for i := 1; i <= step; i++ {
-			prevHead := *head
-			head.y = head.y - 1
-
-			actionTail(head, tail, prevHead, tailVisited)
-		}
+		
 	}
 }
 
@@ -168,7 +158,6 @@ func readInputData(fileName string) []string {
 	for scanner.Scan() {
 		line := scanner.Text()
 		inputData = append(inputData, line)
-
 	}
 
 	return inputData
