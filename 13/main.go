@@ -22,7 +22,7 @@ func CorrectlyOrderedIndicesCount(fileName string) int {
 
 	for i, v := range inputData {
 		fmt.Println("Pair ", i+1)
-		if validateOrder(v[0], v[1]) == true {
+		if ValidateOrder(v[0], v[1]) == true {
 			fmt.Println("Outcome: TRUE")
 			correctlyOrdered = append(correctlyOrdered, i)
 		} else {
@@ -35,14 +35,14 @@ func CorrectlyOrderedIndicesCount(fileName string) int {
 	return sum
 }
 
-func validateOrder(line1 string, line2 string) bool {
+func ValidateOrder(line1 string, line2 string) bool {
 	fmt.Println("Comparing: ", line1, " with ", line2)
 
 	outcome := false
 
 	if strings.HasPrefix(line1, "[") == true || strings.HasPrefix(line2, "[") == true {
 		line1, line2 = refactorBraces(line1, line2)
-		validateOrder(line1, line2)
+		ValidateOrder(line1, line2)
 	}
 
 	line1Elem := strings.Split(line1, ",")
