@@ -28,7 +28,7 @@ var visitedCountLongTest = []struct {
 
 func TestVisitedCountLong(t *testing.T) {
 	for _, val := range visitedCountLongTest {
-		got := VisitedCount(val.input)
+		got := VisitedCountLong(val.input)
 
 		if got != val.expected {
 			t.Error("Nah, it was: ", got)
