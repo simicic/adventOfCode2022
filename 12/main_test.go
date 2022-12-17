@@ -2,16 +2,16 @@ package main
 
 import "testing"
 
-var monkeyBusinessLevelTest = []struct {
+var shortestPathTest = []struct {
 	input    string
 	expected int // expected result
 }{
-	{"input_test.txt", 10605},
+	{"input_test.txt", 31},
 }
 
-func TestMonkeyBusinessLevel(t *testing.T) {
-	for _, val := range monkeyBusinessLevelTest {
-		got := MonkeyBusinessLevel(val.input)
+func TestShortestPath(t *testing.T) {
+	for _, val := range shortestPathTest {
+		got := ShortestPath(val.input)
 
 		if got != val.expected {
 			t.Error("Nah, it was: ", got)

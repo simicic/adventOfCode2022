@@ -27,7 +27,7 @@ type GridInfo struct {
 }
 
 func main() {
-	shortestPath := ShortestPath("12/input_test.txt")
+	shortestPath := ShortestPath("12/input.txt")
 	fmt.Println("Shortest path: ", shortestPath)
 }
 
@@ -36,123 +36,77 @@ func ShortestPath(fileName string) int {
 	gridData := readInputData(fileName, gridInfo)
 
 	startNode := gridData[gridInfo.startNodeAt.toString()]
-	startNode.visited = true
-	delete(gridData, startNode.coordinate.toString())
-	gridData[startNode.coordinate.toString()] = startNode
+	shortestPath := visitPaths(startNode, gridData, gridInfo)
 
-	gridData = calculateDistances(gridData, gridInfo, startNode)
-
-	printGridData(gridData, gridInfo)
-
-	return 0
+	return shortestPath
 }
 
-func printGridData(gridData map[string]Node, info GridInfo) {
-	for y := 0; y < info.sizeY; y++ {
-		var line []string
-		for x := 0; x < info.sizeX; x++ {
-			coordinate := Coordinate{x, y}.toString()
-			v := "."
-			if gridData[coordinate].visited == true {
-				v = ">"
-			}
-			line = append(line, string(v))
-		}
-		fmt.Println(line)
-	}
-}
+func visitPaths(currentNode *Node, gridData map[string]*Node, info GridInfo) int {
+	pathsInLevels := make([][]*Node, 1000)
+	pathsInLevels[0] = []*Node{currentNode}
 
-func calculateDistances(gridData map[string]Node, gridInfo GridInfo, node Node) map[string]Node {
-	toCheck := nextToCheck(node, gridInfo)
+	toVisit := nextToVisit(currentNode, gridData)
+	level := 1
 
-	for len(toCheck) > 0 {
-		var afterThat []Coordinate
+visiting:
+	for len(toVisit) > 0 {
+		nextVisit := make([]*Node, 0)
 
-		for _, v := range toCheck {
-			tmp := gridData[v.toString()]
-			if tmp.visited == true && gridInfo.startNodeAt.toString() != tmp.coordinate.toString() {
+		for _, v := range toVisit {
+			if v.visited {
 				continue
 			}
+			v.visited = true
+			nextVisit = append(nextVisit, nextToVisit(v, gridData)...)
 
-			if tmp.value <= node.value+1 {
-				fmt.Println("Comparing values: ", tmp.value, node.value)
-				tmp.distanceFromStart = node.distanceFromStart + 1
-				tmp.visited = true
-				delete(gridData, v.toString())
-				gridData[v.toString()] = tmp
-
-				if tmp.coordinate.toString() != gridInfo.endNodeAt.toString() {
-					afterThat = append(afterThat, nextToCheck(tmp, gridInfo)...)
-					fmt.Println(afterThat, " are neighbours of: ", tmp)
-				}
-				node = tmp
+			if v.coordinate.toString() == info.endNodeAt.toString() {
+				break visiting
 			}
 		}
-
-		var filtered []Coordinate
-		for _, v := range afterThat {
-			if gridData[v.toString()].visited == false {
-				filtered = append(filtered, v)
-			}
-		}
-
-		toCheck = filtered
-		fmt.Println("Neighbours to check: ", toCheck)
+		pathsInLevels[level] = toVisit
+		toVisit = nextVisit
+		level++
 	}
 
-	return gridData
+	return level
 }
 
-func nextToCheck(node Node, gridInfo GridInfo) []Coordinate {
-	var toCheck []Coordinate
+func nextToVisit(startNode *Node, gridData map[string]*Node) []*Node {
+	var toVisit []*Node
 
-	up, upE := nodeCoordinate(node, "up", gridInfo)
-	if upE != "Error" {
-		toCheck = append(toCheck, up)
+	// left
+	left := Coordinate{x: startNode.coordinate.x - 1, y: startNode.coordinate.y}
+	leftElem, found := gridData[left.toString()]
+	if found == true && leftElem.value-1 <= startNode.value && leftElem.visited == false {
+		toVisit = append(toVisit, leftElem)
 	}
 
-	down, downE := nodeCoordinate(node, "down", gridInfo)
-	if downE != "Error" {
-		toCheck = append(toCheck, down)
+	// right
+	right := Coordinate{x: startNode.coordinate.x + 1, y: startNode.coordinate.y}
+	rightElem, found := gridData[right.toString()]
+	if found == true && rightElem.value-1 <= startNode.value && rightElem.visited == false {
+		toVisit = append(toVisit, rightElem)
 	}
 
-	left, leftE := nodeCoordinate(node, "left", gridInfo)
-	if leftE != "Error" {
-		toCheck = append(toCheck, left)
+	// up
+	up := Coordinate{x: startNode.coordinate.x, y: startNode.coordinate.y + 1}
+	upElem, found := gridData[up.toString()]
+	if found == true && upElem.value-1 <= startNode.value && upElem.visited == false {
+		toVisit = append(toVisit, upElem)
 	}
 
-	right, rightE := nodeCoordinate(node, "right", gridInfo)
-	if rightE != "Error" {
-		toCheck = append(toCheck, right)
+	// down
+	down := Coordinate{x: startNode.coordinate.x, y: startNode.coordinate.y - 1}
+	downElem, found := gridData[down.toString()]
+	if found == true && downElem.value-1 <= startNode.value && downElem.visited == false {
+		toVisit = append(toVisit, downElem)
 	}
 
-	return toCheck
+	return toVisit
 }
 
-func nodeCoordinate(node Node, direction string, gridInfo GridInfo) (Coordinate, string) {
-	switch direction {
-	case "up":
-		if node.coordinate.y+1 < gridInfo.sizeY {
-			return Coordinate{node.coordinate.x, node.coordinate.y + 1}, ""
-		}
-	case "down":
-		if node.coordinate.y-1 >= 0 {
-			return Coordinate{node.coordinate.x, node.coordinate.y - 1}, ""
-		}
-	case "left":
-		if node.coordinate.x+1 < gridInfo.sizeX {
-			return Coordinate{node.coordinate.x + 1, node.coordinate.y}, ""
-		}
-	case "right":
-		if node.coordinate.x-1 >= 0 {
-			return Coordinate{node.coordinate.x - 1, node.coordinate.y}, ""
-		}
-	}
-	return Coordinate{-1, -1}, "Error"
-}
-
-func readInputData(fileName string, gridInfo GridInfo) map[string]Node {
-	inputData := make(map[string]Node, gridInfo.sizeX*gridInfo.sizeY)
+func readInputData(fileName string, gridInfo GridInfo) map[string]*Node {
+	inputData := make(map[string]*Node, gridInfo.sizeX*gridInfo.sizeY)
 
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -175,7 +129,7 @@ func readInputData(fileName string, gridInfo GridInfo) map[string]Node {
 			}
 			node := Node{coordinate: coordinate, value: int(v)}
 
-			inputData[coordinate.toString()] = node
+			inputData[coordinate.toString()] = &node
 		}
 		y++
 	}
@@ -207,9 +161,9 @@ func getGridInfo(fileName string) GridInfo {
 		for x, v := range line {
 			coordinate := Coordinate{x, y}
 
-			if string(v) == "E" {
+			if v == 'E' {
 				endCoordinate = coordinate
-			} else if string(v) == "S" {
+			} else if v == 'S' {
 				startCoordinate = coordinate
 			}
 		}
