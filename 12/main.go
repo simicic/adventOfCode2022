@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os"
 )
 
@@ -13,10 +14,9 @@ type Coordinate struct {
 }
 
 type Node struct {
-	coordinate        Coordinate
-	value             int
-	distanceFromStart int
-	visited           bool
+	coordinate Coordinate
+	value      int
+	visited    bool
 }
 
 type GridInfo struct {
@@ -29,6 +29,34 @@ type GridInfo struct {
 func main() {
 	shortestPath := ShortestPath("12/input.txt")
 	fmt.Println("Shortest path: ", shortestPath)
+
+	shortestFromA := ShortestFromA("12/input.txt")
+	fmt.Println("Shortest from any A: ", shortestFromA)
+}
+
+func ShortestFromA(fileName string) int {
+	gridInfo := getGridInfo(fileName)
+	gridData := readInputData(fileName, gridInfo)
+
+	shortestPath := math.MaxInt
+	for _, startNode := range gridData {
+		if startNode.value == 'a' {
+			cleanGridData(gridData)
+			distance := visitPaths(startNode, gridData, gridInfo)
+
+			if distance < shortestPath {
+				shortestPath = distance
+			}
+		}
+	}
+
+	return shortestPath
+}
+
+func cleanGridData(gridData map[string]*Node) {
+	for _, v := range gridData {
+		v.visited = false
+	}
 }
 
 func ShortestPath(fileName string) int {
@@ -46,7 +74,9 @@ func visitPaths(currentNode *Node, gridData map[string]*Node, info GridInfo) int
 	pathsInLevels[0] = []*Node{currentNode}
 
 	toVisit := nextToVisit(currentNode, gridData)
+	currentNode.visited = true
 	level := 1
+	found := false
 
 visiting:
 	for len(toVisit) > 0 {
@@ -60,6 +90,7 @@ visiting:
 			nextVisit = append(nextVisit, nextToVisit(v, gridData)...)
 
 			if v.coordinate.toString() == info.endNodeAt.toString() {
+				found = true
 				break visiting
 			}
 		}
@@ -68,7 +99,11 @@ visiting:
 		level++
 	}
 
-	return level
+	if found {
+		return level
+	} else {
+		return math.MaxInt
+	}
 }
 
 func nextToVisit(startNode *Node, gridData map[string]*Node) []*Node {
